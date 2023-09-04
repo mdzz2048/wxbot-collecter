@@ -1,0 +1,4 @@
+github.com/eatmoreapple/openwechat v1.4.4 h1:rAH3jy+Gn8TsN1yi5jBV2bKvbDC87XOpss+GXx6Ci0A=
+github.com/eatmoreapple/openwechat v1.4.4/go.mod h1:h4m2N8m0XsUKlm7UR8BUGkV89GNuKHCnlGV3J8n9Mpw=
+github.com/mattn/go-sqlite3 v1.14.17 h1:mCRHCLDUBXgpKAqIKsaAaAsrAlbkeomtRFKXh2L6YIM=
+github.com/mattn/go-sqlite3 v1.14.17/go.mod h1:2eHXhiwb8IkHr+BDWZGa96P6+rkvnG63S2DGjv9HUNg=
