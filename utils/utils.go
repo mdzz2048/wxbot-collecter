@@ -68,11 +68,11 @@ func (config Config) InitConfig() {
 	}
 	jsonData, err := JsonMarshalIndent(configData, "", "\t")
 	if err != nil {
-		log.Fatalln("初始化配置文件失败: ", err)
+		log.Println("初始化配置文件失败: ", err)
 	}
 	err = ioutil.WriteFile(CONFIG_PATH, jsonData, 0644)
 	if err != nil {
-		log.Fatalln("写入配置文件失败: ", err)
+		log.Println("写入配置文件失败: ", err)
 	}
 }
 

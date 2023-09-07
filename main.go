@@ -24,7 +24,7 @@ func SaveURL(url string) utils.Article {
 	case "simpread":
 		return SaveToSimpRead(url)
 	default:
-		log.Fatalln("未定义的保存方式: ", collectType)
+		log.Println("未定义的保存方式: ", collectType)
 		return utils.Article{}
 	}
 }
@@ -32,12 +32,12 @@ func SaveURL(url string) utils.Article {
 func SaveToCubox(url string) utils.Article {
 	webInfo, err := cubox.SearchEngineWebInfo(url)
 	if err != nil {
-		log.Fatalln("获取网页信息失败: ", err)
+		log.Println("获取网页信息失败: ", err)
 		return utils.Article{}
 	}
 	bookmark, err := cubox.SearchEngineNew(url, webInfo)
 	if err != nil {
-		log.Fatalln("网页收藏失败: ", err)
+		log.Println("网页收藏失败: ", err)
 		return utils.Article{}
 	}
 
@@ -51,7 +51,7 @@ func SaveToCubox(url string) utils.Article {
 func SaveToSimpRead(url string) utils.Article {
 	webInfo, err := cubox.SearchEngineWebInfo(url)
 	if err != nil {
-		log.Fatalln("获取网页信息失败: ", err)
+		log.Println("获取网页信息失败: ", err)
 		return utils.Article{}
 	}
 	urlInfo := simpread.WebInfo{
@@ -61,7 +61,7 @@ func SaveToSimpRead(url string) utils.Article {
 	}
 	success := simpread.AddURL(url, &urlInfo)
 	if !success {
-		log.Fatalln("网页收藏失败: ", err)
+		log.Println("网页收藏失败: ", err)
 		return utils.Article{}
 	}
 
@@ -115,7 +115,7 @@ func main() {
 	var err_count int32
 	bot.MessageErrorHandler = func(err error) error {
 		// 日志记录
-		log.Fatalln("Message error: ", err)
+		log.Println("Message error: ", err)
 
 		// 错误计数
 		atomic.AddInt32(&err_count, 1)

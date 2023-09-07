@@ -63,7 +63,7 @@ func IsTableExist(db *sql.DB, tableName string) bool {
 	query := fmt.Sprintf("SELECT name FROM sqlite_master WHERE type='table' AND name='%s'", tableName)
 	rows, err := db.Query(query)
 	if err != nil {
-		log.Fatalf("查询 %s 表失败: %s", tableName, err)
+		log.Panicf("查询 %s 表失败: %s", tableName, err)
 		return false
 	}
 	defer rows.Close()
@@ -79,7 +79,7 @@ func createTable(db *sql.DB, tableName string, statement string) {
 
 	_, err := db.Exec(statement)
 	if err != nil {
-		log.Fatalf("表 %s 创建失败: %s\n", tableName, err)
+		log.Panicf("表 %s 创建失败: %s\n", tableName, err)
 		return
 	}
 	fmt.Printf("表 %s 创建成功\n", tableName)

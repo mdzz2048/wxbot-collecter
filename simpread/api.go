@@ -59,12 +59,12 @@ func AddURL(url string, data *WebInfo) bool {
 	}
 	result, err := request(option)
 	if err != nil {
-		log.Fatalln("API 请求异常: ", err)
+		log.Println("API 请求异常: ", err)
 		return false
 	}
 	resp_code := result.Code
 	if resp_code != 201 {
-		log.Fatalln("API 请求失败: ", result.Message)
+		log.Println("API 请求失败: ", result.Message)
 		return false
 	}
 	log.Println("API 请求成功", api)
