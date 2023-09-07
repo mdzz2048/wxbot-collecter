@@ -133,11 +133,13 @@ func Login() string {
 		Method:      "POST",
 		ContentType: "application/x-www-form-urlencoded",
 	}
-	fmt.Println(option)
 	result, err := request(option)
 	if err != nil {
-		log.Fatalln("API 请求失败: ", err)
+		log.Println("API 请求异常: ", err)
 		return ""
+	}
+	if result.Message != "" {
+		log.Println("API 请求失败: ", result.Message)
 	}
 	log.Println("API 请求成功")
 
@@ -163,8 +165,12 @@ func SearchEngineWebInfo(url string) (*WebInfo, error) {
 	}
 	result, err := request(option)
 	if err != nil {
-		log.Fatalln("API 请求失败: ", err)
+		log.Println("API 请求异常: ", err)
 		return nil, err
+	}
+	if result.Message != "" {
+		log.Println("API 请求失败: ", result.Message)
+		utils.PrintResp(result)
 	}
 	log.Println("API 请求成功")
 
@@ -172,7 +178,7 @@ func SearchEngineWebInfo(url string) (*WebInfo, error) {
 	jsonData, _ := utils.JsonMarshal(result.Data)
 	err = utils.JsonUnmarshal(jsonData, &webInfo)
 	if err != nil {
-		log.Fatalln("返回值解析失败: ", err)
+		log.Println("返回值解析失败: ", err)
 		return nil, err
 	}
 
@@ -196,8 +202,12 @@ func SearchEngineNew(url string, data *WebInfo) (*BookMark, error) {
 	}
 	result, err := request(option)
 	if err != nil {
-		log.Fatalln("API 请求失败: ", err)
+		log.Println("API 请求异常: ", err)
 		return nil, err
+	}
+	if result.Message != "" {
+		log.Println("API 请求失败: ", result.Message)
+		utils.PrintResp(result)
 	}
 	log.Println("API 请求成功")
 
@@ -205,12 +215,9 @@ func SearchEngineNew(url string, data *WebInfo) (*BookMark, error) {
 	jsonData, _ := utils.JsonMarshal(result.Data)
 	err = utils.JsonUnmarshal(jsonData, &bookmark)
 	if err != nil {
-		log.Fatalln("返回值解析失败: ", err)
+		log.Println("返回值解析失败: ", err)
 		return nil, err
 	}
-	// test
-	// resp, _ := utils.JsonMarshalIndent(&result, "", "  ")
-	// fmt.Println(string(resp))
 
 	return &bookmark, nil
 }
