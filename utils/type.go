@@ -3,9 +3,10 @@ package utils
 /* ------------------------ 配置文件 ------------------------ */
 
 type Config struct {
-	Cubox  CuboxConfig  `json:"cubox"`
-	SiYuan SiYuanConfig `json:"siyuan"`
-	WeChat WeChatConfig `json:"wechat"`
+	Cubox    CuboxConfig    `json:"cubox"`
+	SiYuan   SiYuanConfig   `json:"siyuan"`
+	WeChat   WeChatConfig   `json:"wechat"`
+	SimpRead SimpReadConfig `json:"simpread"`
 }
 
 type CuboxConfig struct {
@@ -17,6 +18,10 @@ type CuboxConfig struct {
 type SiYuanConfig struct {
 	SiYuanHost  string `json:"siyuan_host"`
 	SiYuanToken string `json:"siyuan_token"`
+}
+
+type SimpReadConfig struct {
+	SimpReadToken string `json:"simpread_token"`
 }
 
 type WeChatConfig struct {

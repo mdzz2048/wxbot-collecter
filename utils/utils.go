@@ -17,7 +17,7 @@ import (
 )
 
 /* ------------------------ 常量 ------------------------ */
-var CONFIG_PATH = filepath.Join("../data", "config.json")
+var CONFIG_PATH = filepath.Join("./data", "config.json")
 var DB_PATH = filepath.Join("./data", "wxbot.db")
 var USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69"
 
@@ -27,6 +27,17 @@ func IsURL(str string) bool {
 	pattern := `^(http|https)://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(?:/[^/]*)*$`
 	match, _ := regexp.MatchString(pattern, str)
 	return match
+}
+
+/* ------------------------ 环境 ------------------------ */
+
+func GetCollectType() string {
+	collectType, exist := os.LookupEnv("COLLECT_TYPE")
+	if exist {
+		return collectType
+	} else {
+		return "cubox"
+	}
 }
 
 /* ------------------------ 配置 ------------------------ */

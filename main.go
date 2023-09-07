@@ -1,23 +1,33 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 	"sync/atomic"
 	"wxbot/cubox"
 	"wxbot/database"
+	"wxbot/simpread"
 	"wxbot/utils"
 
 	"github.com/eatmoreapple/openwechat"
 )
 
-var config = GetConfig(configPath)
-var configPath = filepath.Join("./data", "config.json")
+var config = utils.Config{}.GetConfig()
+var collectType = utils.GetCollectType()
+
+func SaveURL(url string) utils.Article {
+	switch collectType {
+	case "cubox":
+		return SaveToCubox(url)
+	case "simpread":
+		return SaveToSimpRead(url)
+	default:
+		log.Fatalln("未定义的保存方式: ", collectType)
+		return utils.Article{}
+	}
+}
 
 func SaveToCubox(url string) utils.Article {
 	webInfo, err := cubox.SearchEngineWebInfo(url)
@@ -38,17 +48,32 @@ func SaveToCubox(url string) utils.Article {
 	return article
 }
 
-func GetConfig(configPath string) utils.Config {
-	data, _ := ioutil.ReadFile(configPath)
-
-	config := utils.Config{}
-	err := json.Unmarshal(data, &config)
+func SaveToSimpRead(url string) utils.Article {
+	webInfo, err := cubox.SearchEngineWebInfo(url)
 	if err != nil {
-		fmt.Println("解析配置文件失败", err)
-		return utils.Config{}
+		log.Fatalln("获取网页信息失败: ", err)
+		return utils.Article{}
+	}
+	urlInfo := simpread.WebInfo{
+		URL:         webInfo.URL,
+		Title:       webInfo.Title,
+		Description: webInfo.Description,
+	}
+	success := simpread.AddURL(url, &urlInfo)
+	if !success {
+		log.Fatalln("网页收藏失败: ", err)
+		return utils.Article{}
 	}
 
-	return config
+	article := utils.Article{
+		Title:       urlInfo.Title,
+		URL:         urlInfo.URL,
+		Description: urlInfo.Description,
+	}
+	db, _ := database.ConnectDatabase()
+	database.ArticleAdd(db, &article)
+
+	return article
 }
 
 func IsOwner(ctx *openwechat.MessageContext) bool {
@@ -121,12 +146,12 @@ func main() {
 			url := mediaData.AppMsg.URL
 			fmt.Printf("%v 收到消息: %s\n", ctx.CreateTime, url)
 
-			article := SaveToCubox(url)
+			article := SaveURL(url)
 			if article.Title == "" {
 				replyText := fmt.Sprintln("文章保存失败!")
 				ctx.ReplyText(replyText)
 			} else {
-				replyText := fmt.Sprintf("文章已保存: \n标题: %s\n链接: %s\n", title, url)
+				replyText := fmt.Sprintf("文章已保存至 %s: \n标题: %s\n链接: %s\n", collectType, title, url)
 				ctx.ReplyText(replyText)
 			}
 		}
@@ -140,13 +165,13 @@ func main() {
 		if utils.IsURL(textData) {
 			fmt.Printf("%v 收到消息: %s", ctx.CreateTime, textData)
 
-			article := SaveToCubox(textData)
+			article := SaveURL(textData)
 
 			if article.Title == "" {
-				replyText := fmt.Sprintf("尝试保存链接失败\n标题: %s\n链接: %s\n", article.Title, article.URL)
+				replyText := fmt.Sprintln("尝试保存链接失败!")
 				ctx.ReplyText(replyText)
 			} else {
-				replyText := fmt.Sprintf("文章已保存: \n标题: %s\n链接: %s\n", article.Title, article.URL)
+				replyText := fmt.Sprintf("文章已保存至 %s: \n标题: %s\n链接: %s\n", collectType, article.Title, article.URL)
 				ctx.ReplyText(replyText)
 			}
 		}
