@@ -1,23 +1,20 @@
 package cubox
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"wxbot/utils"
 )
 
 // 本地测试为了方便，直接从父目录读取，打包运行的时候不行
 // var configPath = filepath.Join("..", "config.json")
 var urls = CuboxURL()
-var config = getConfig()
-var configPath = filepath.Join("./data", "config.json")
-
-var userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69"
+var config = utils.Config{}
+var cuboxConfig = config.GetConfig().Cubox
+var userAgent = utils.USER_AGENT
 
 type apiEndpoints struct {
 	Login                  string
@@ -81,55 +78,10 @@ func CuboxURL() apiEndpoints {
 	return apiEndpoints
 }
 
-func getConfig() utils.CuboxConfig {
-	data, _ := ioutil.ReadFile(configPath)
-
-	config := utils.Config{}
-	err := json.Unmarshal(data, &config)
-	if err != nil {
-		fmt.Println("解析配置文件失败", err)
-		return utils.CuboxConfig{}
-	}
-
-	return config.Cubox
-}
-
-func updateConfig(config utils.CuboxConfig) {
-	// 打开配置文件
-	file, err := os.OpenFile(configPath, os.O_RDWR, 0644)
-	if err != nil {
-		fmt.Println("打开配置文件失败: ", err)
-		return
-	}
-	defer file.Close()
-
-	// 读取原始的 JSON 数据
-	mainConfig := utils.Config{}
-	err = json.NewDecoder(file).Decode(&mainConfig)
-	if err != nil {
-		fmt.Println("解码配置时发生错误:", err)
-		return
-	}
-
-	// 将文件指针移动到文件开头
-	file.Seek(0, 0)
-
-	// 清空文件内容
-	err = file.Truncate(0)
-	if err != nil {
-		fmt.Println("清空配置文件时发生错误: ", err)
-		return
-	}
-
-	// 更新配置文件
-	mainConfig.Cubox = config
-	err = json.NewEncoder(file).Encode(mainConfig)
-	if err != nil {
-		fmt.Println("写入配置文件错误: ", err)
-		return
-	}
-
-	fmt.Println("更新配置文件成功")
+func updateConfig(cuboxConfig utils.CuboxConfig) {
+	mainConfig := config.GetConfig()
+	mainConfig.Cubox = cuboxConfig
+	config.UpdateConfig(mainConfig)
 }
 
 func request(option requestOption) (*APIResp, error) {
@@ -142,8 +94,8 @@ func request(option requestOption) (*APIResp, error) {
 	}
 
 	req.Header.Set("User-Agent", userAgent)
-	if config.CuboxToken != "" {
-		req.Header.Set("Authorization", config.CuboxToken)
+	if cuboxConfig.CuboxToken != "" {
+		req.Header.Set("Authorization", cuboxConfig.CuboxToken)
 	}
 	if option.ContentType != "" {
 		req.Header.Set("Content-Type", option.ContentType)
@@ -168,10 +120,10 @@ func request(option requestOption) (*APIResp, error) {
 
 func Login() string {
 	var api = urls.Login
-	var password = utils.GetMd5Str(config.CuboxPassword)
+	var password = utils.GetMd5Str(cuboxConfig.CuboxPassword)
 
 	body := LoginBody{
-		UserName:  config.CuboxUser,
+		UserName:  cuboxConfig.CuboxUser,
 		Password:  password,
 		AutoLogin: true,
 	}
@@ -189,8 +141,8 @@ func Login() string {
 	}
 	log.Println("API 请求成功")
 
-	config.CuboxToken = result.Token
-	updateConfig(config)
+	cuboxConfig.CuboxToken = result.Token
+	updateConfig(cuboxConfig)
 
 	return result.Token
 }

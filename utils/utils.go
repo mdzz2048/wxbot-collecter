@@ -6,11 +6,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"net/url"
+	"os"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
 )
+
+/* ------------------------ 常量 ------------------------ */
+var CONFIG_PATH = filepath.Join("../data", "config.json")
+var DB_PATH = filepath.Join("./data", "wxbot.db")
+var USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69"
 
 /* ------------------------ 判断 ------------------------ */
 
@@ -18,6 +27,84 @@ func IsURL(str string) bool {
 	pattern := `^(http|https)://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(?:/[^/]*)*$`
 	match, _ := regexp.MatchString(pattern, str)
 	return match
+}
+
+/* ------------------------ 配置 ------------------------ */
+func (config Config) IsConfigExist() bool {
+	if _, err := os.Stat(CONFIG_PATH); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+func (config Config) InitConfig() {
+	configData := Config{
+		Cubox: CuboxConfig{
+			CuboxUser:     "",
+			CuboxPassword: "",
+			CuboxToken:    "",
+		},
+		SiYuan: SiYuanConfig{
+			SiYuanHost:  "",
+			SiYuanToken: "",
+		},
+		SimpRead: SimpReadConfig{
+			SimpReadToken: "",
+		},
+		WeChat: WeChatConfig{
+			WeChatName: "",
+		},
+	}
+	jsonData, err := JsonMarshalIndent(configData, "", "\t")
+	if err != nil {
+		log.Fatalln("初始化配置文件失败: ", err)
+	}
+	err = ioutil.WriteFile(CONFIG_PATH, jsonData, 0644)
+	if err != nil {
+		log.Fatalln("写入配置文件失败: ", err)
+	}
+}
+
+func (config Config) GetConfig() Config {
+	data, _ := ioutil.ReadFile(CONFIG_PATH)
+
+	configData := Config{}
+	err := json.Unmarshal(data, &configData)
+	if err != nil {
+		fmt.Println("解析配置文件失败", err)
+		return configData
+	}
+
+	return configData
+}
+
+func (config Config) UpdateConfig(configData Config) {
+	// 打开配置文件
+	file, err := os.OpenFile(CONFIG_PATH, os.O_RDWR, 0644)
+	if err != nil {
+		fmt.Println("打开配置文件失败: ", err)
+		return
+	}
+	defer file.Close()
+
+	// 将文件指针移动到文件开头
+	file.Seek(0, 0)
+
+	// 清空文件内容
+	err = file.Truncate(0)
+	if err != nil {
+		fmt.Println("清空配置文件时发生错误: ", err)
+		return
+	}
+
+	// 更新配置文件
+	err = json.NewEncoder(file).Encode(configData)
+	if err != nil {
+		fmt.Println("写入配置文件错误: ", err)
+		return
+	}
+
+	fmt.Println("更新配置文件成功")
 }
 
 /* ------------------------ 加密 ------------------------ */
@@ -55,7 +142,7 @@ func JsonMarshalIndent(v interface{}, prefix, indent string) ([]byte, error) {
 }
 
 func PrintResp(v interface{}) {
-	resp, _ := JsonMarshalIndent(v, "", "  ")
+	resp, _ := JsonMarshalIndent(v, "", "\t")
 	fmt.Println(string(resp))
 }
 

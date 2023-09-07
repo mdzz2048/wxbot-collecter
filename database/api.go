@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"wxbot/cubox"
 	"wxbot/utils"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dbPath = filepath.Join("./data", "wxbot.db")
+var dbPath = utils.DB_PATH
 
 /* ------------------------ Database ------------------------ */
 

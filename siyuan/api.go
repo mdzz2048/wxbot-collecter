@@ -1,30 +1,15 @@
 package siyuan
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"path/filepath"
 	"wxbot/utils"
 )
 
-var config = getConfig(configPath)
-var configPath = filepath.Join("./data", "config.json")
-
-func getConfig(filePath string) utils.SiYuanConfig {
-	data, _ := ioutil.ReadFile(filePath)
-
-	config := utils.SiYuanConfig{}
-	err := json.Unmarshal(data, &config)
-	if err != nil {
-		fmt.Println("解析配置文件失败", err)
-		return utils.SiYuanConfig{}
-	}
-
-	return config
-}
+var config = utils.Config{}
+var siyuanConfig = config.GetConfig().SiYuan
 
 func request(option requestOption) (*SiYuanAPiResp, error) {
 	// 发送请求体
@@ -33,8 +18,8 @@ func request(option requestOption) (*SiYuanAPiResp, error) {
 		return nil, err
 	}
 
-	if config.SiYuanToken != "" {
-		req.Header.Add("Authorization", config.SiYuanToken)
+	if siyuanConfig.SiYuanToken != "" {
+		req.Header.Add("Authorization", siyuanConfig.SiYuanToken)
 	}
 	if option.ContentType != "" {
 		req.Header.Add("Content-Type", option.ContentType)

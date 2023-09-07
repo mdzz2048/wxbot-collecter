@@ -7,19 +7,23 @@ import (
 )
 
 func TestGetConfig(t *testing.T) {
-	config := getConfig()
+	config := utils.Config{}.GetConfig()
+	config_cubox := config.Cubox
 
-	if (config == utils.CuboxConfig{}) {
+	if (config_cubox == utils.CuboxConfig{}) {
 		t.Errorf("获取配置文件失败")
 	}
-	fmt.Println(config)
+	fmt.Println(config_cubox)
 }
 
 func TestUpdateConfig(t *testing.T) {
-	config := getConfig()
+	config := utils.Config{}.GetConfig()
+	utils.PrintResp(config)
+	config_cubox := config.GetConfig().Cubox
+	config_cubox.CuboxToken = "1"
+	config.Cubox = config_cubox
 
-	config.CuboxToken = "1"
-	updateConfig(config)
+	config.UpdateConfig(config)
 }
 
 func TestRequest(t *testing.T) {
