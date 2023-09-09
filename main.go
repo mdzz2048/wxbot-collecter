@@ -30,6 +30,8 @@ func SaveURL(url string) utils.Article {
 }
 
 func SaveToCubox(url string) utils.Article {
+	cubox.RefreshToken()
+
 	webInfo, err := cubox.SearchEngineWebInfo(url)
 	if err != nil {
 		log.Println("获取网页信息失败: ", err)

@@ -1,6 +1,7 @@
 package cubox
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -16,6 +17,7 @@ var userAgent = utils.USER_AGENT
 
 const (
 	login                  = "/c/api/login"
+	userInfo               = "/c/api/userInfo"
 	searchEngineExport     = "/c/api/v2/search_engine/inbox"
 	searchEngineInbox      = "/c/api/v2/search_engine/my"
 	searchEngineToday      = "/c/api/search_engines/export/text"
@@ -112,13 +114,57 @@ func Login() string {
 	}
 	if result.Message != "" {
 		log.Println("API 请求失败: ", result.Message)
+		return ""
 	}
-	log.Println("API 请求成功")
 
 	cuboxConfig.CuboxToken = result.Token
 	updateConfig(cuboxConfig)
 
 	return result.Token
+}
+
+func RefreshToken() string {
+	var token = cuboxConfig.CuboxToken
+	_, err := UserInfo()
+	if err == nil {
+		return token
+	}
+	if err.Error() == "token error!" {
+		token = Login()
+		return token
+	}
+	log.Println("刷新 Token 失败: ", err.Error())
+	return token
+}
+
+/* ------------------------ UserInfo ------------------------ */
+
+func UserInfo() (*User, error) {
+	var api = baseHost + userInfo
+
+	option := requestOption{
+		URL:    api,
+		Method: "GET",
+	}
+	result, err := request(option)
+	if err != nil {
+		log.Println("API 请求异常: ", err)
+		return nil, err
+	}
+	if result.Message != "" {
+		log.Println("API 请求失败: ", err)
+		utils.PrintResp(result)
+		return nil, errors.New(result.Message)
+	}
+
+	user := User{}
+	jsonData, _ := utils.JsonMarshal(result.Data)
+	err = utils.JsonUnmarshal(jsonData, &user)
+	if err != nil {
+		log.Println("返回值解析失败: ", err)
+		return nil, err
+	}
+	return &user, nil
 }
 
 /* ------------------------ SearchEngine ------------------------ */
@@ -143,8 +189,8 @@ func SearchEngineWebInfo(url string) (*WebInfo, error) {
 	if result.Message != "" {
 		log.Println("API 请求失败: ", result.Message)
 		utils.PrintResp(result)
+		return nil, errors.New(result.Message)
 	}
-	log.Println("API 请求成功")
 
 	webInfo := WebInfo{}
 	jsonData, _ := utils.JsonMarshal(result.Data)
@@ -180,8 +226,8 @@ func SearchEngineNew(url string, data *WebInfo) (*BookMark, error) {
 	if result.Message != "" {
 		log.Println("API 请求失败: ", result.Message)
 		utils.PrintResp(result)
+		return nil, errors.New(result.Message)
 	}
-	log.Println("API 请求成功")
 
 	bookmark := BookMark{}
 	jsonData, _ := utils.JsonMarshal(result.Data)

@@ -1,6 +1,8 @@
 package cubox
 
-import "io"
+import (
+	"io"
+)
 
 /* ------------------------ 请求体 ------------------------ */
 
@@ -42,6 +44,29 @@ type APIResp struct {
 	Data    interface{} `json:"data"`
 	Token   string      `json:"token"`
 	UserId  string      `json:"userId"`
+}
+
+// path: /c/api/userInfo
+type User struct {
+	ID            string `json:"id"`
+	UserName      string `json:"userName"`
+	Email         string `json:"email"`
+	Mobile        string `json:"mobile"`
+	Password      string `json:"password"`
+	NickName      string `json:"nickName"`
+	ThirdNickName string `json:"thirdNickName"`
+	Admin         bool   `json:"admin"`
+	IsThirdUser   bool   `json:"isThirdUser"`
+	Level         int    `json:"level"`
+	PayTime       string `json:"payTime"`
+	ExpireTime    string `json:"expireTime"`
+	IsExpire      bool   `json:"isExpire"`
+	Receipt       string `json:"receipt"`
+	PaymentSource string `json:"paymentSource"`
+	Region        string `json:"region"`
+	ThirdAccounts string `json:"thirdAccounts"`
+	Expire        bool   `json:"expire"`
+	ThirdUser     bool   `json:"thirdUser" `
 }
 
 // path: /c/api/v2/search_engine/webInfo

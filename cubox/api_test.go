@@ -47,6 +47,26 @@ func TestLogin(t *testing.T) {
 	fmt.Println(token)
 }
 
+func TestUserInfo(t *testing.T) {
+	user, err := UserInfo()
+	if err != nil {
+		t.Errorf("获取用户信息失败")
+	}
+	utils.PrintResp(user)
+}
+
+func TestRefreshToken(t *testing.T) {
+	config := utils.Config{}.GetConfig()
+	config_cubox := config.Cubox
+	token := RefreshToken()
+
+	if token == config_cubox.CuboxToken {
+		fmt.Println("Token 不用更新")
+	} else {
+		fmt.Println(token, "\n", config_cubox.CuboxToken)
+	}
+}
+
 func TestSearchEngineWebInfo(t *testing.T) {
 	url := "https://cloud.tencent.com/developer/article/1849807"
 	webInfo, err := SearchEngineWebInfo(url)
