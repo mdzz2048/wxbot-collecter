@@ -9,39 +9,37 @@ import (
 	"wxbot/utils"
 )
 
-// 本地测试为了方便，直接从父目录读取，打包运行的时候不行
-// var configPath = filepath.Join("..", "config.json")
-var urls = CuboxURL()
+var baseHost = getCuboxHost()
 var config = utils.Config{}
 var cuboxConfig = config.GetConfig().Cubox
 var userAgent = utils.USER_AGENT
 
-type apiEndpoints struct {
-	Login                  string
-	SearchEngineExport     string
-	SearchEngineInbox      string
-	SearchEngineToday      string
-	SearchEngineMy         string
-	SearchEngineNew        string
-	SearchEngineUpdate     string
-	SearchEngineUpdateTags string
-	SearchEngineWebInfo    string
-	BookmarkContent        string
-	BookmarkDetail         string
-	BookmarkExist          string
-	TagList                string
-	TagRecent              string
-	TagNew                 string
-	TagsDelete             string
-	TagUpdate              string
-	TagMerge               string
-	TagMove                string
-	TagSort                string
-	MarkLatest             string
-	MarkList               string
-}
+const (
+	login                  = "/c/api/login"
+	searchEngineExport     = "/c/api/v2/search_engine/inbox"
+	searchEngineInbox      = "/c/api/v2/search_engine/my"
+	searchEngineToday      = "/c/api/search_engines/export/text"
+	searchEngineMy         = "/c/api/v2/search_engine/new"
+	searchEngineNew        = "/c/api/search_engine/today"
+	searchEngineUpdate     = "/c/api/v3/search_engine/update"
+	searchEngineUpdateTags = "/c/api/v2/search_engines/updateTagsForName"
+	searchEngineWebInfo    = "/c/api/v2/search_engine/webInfo"
+	bookmarkContent        = "/c/api/bookmark/content"
+	bookmarkDetail         = "/c/api/v2/bookmark/detail"
+	bookmarkExist          = "/c/api/bookmark/exist"
+	tagList                = "/c/api/v2/tag/list"
+	tagRecent              = "/c/api/tag/use/recent"
+	tagNew                 = "/c/api/v2/tag/new"
+	tagsDelete             = "/c/api/tags/delete"
+	tagUpdate              = "/c/api/tag/update"
+	tagMerge               = "/c/api/tag/merge"
+	tagMove                = "/c/api/tag/move"
+	tagSort                = "/c/api/tag/sort"
+	markLatest             = "/c/api/mark/search_engine/latest"
+	markList               = "/c/api/v2/mark"
+)
 
-func CuboxURL() apiEndpoints {
+func getCuboxHost() string {
 	host, exists := os.LookupEnv("CUBOX_HOST")
 	if exists {
 		fmt.Println("Get CUBOX_HOST: ", host)
@@ -49,33 +47,7 @@ func CuboxURL() apiEndpoints {
 		host = "https://cubox.pro"
 		fmt.Println("CUBOX_HOST is undefined, use default host: https://cubox.pro")
 	}
-
-	apiEndpoints := apiEndpoints{
-		Login:                  host + "/c/api/login",
-		SearchEngineInbox:      host + "/c/api/v2/search_engine/inbox",
-		SearchEngineMy:         host + "/c/api/v2/search_engine/my",
-		SearchEngineExport:     host + "/c/api/search_engines/export/text",
-		SearchEngineNew:        host + "/c/api/v2/search_engine/new",
-		SearchEngineToday:      host + "/c/api/search_engine/today",
-		SearchEngineUpdate:     host + "/c/api/v3/search_engine/update",
-		SearchEngineUpdateTags: host + "/c/api/v2/search_engines/updateTagsForName",
-		SearchEngineWebInfo:    host + "/c/api/v2/search_engine/webInfo",
-		BookmarkContent:        host + "/c/api/bookmark/content",
-		BookmarkDetail:         host + "/c/api/v2/bookmark/detail",
-		BookmarkExist:          host + "/c/api/bookmark/exist",
-		TagList:                host + "/c/api/v2/tag/list",
-		TagRecent:              host + "/c/api/tag/use/recent",
-		TagNew:                 host + "/c/api/v2/tag/new",
-		TagsDelete:             host + "/c/api/tags/delete",
-		TagUpdate:              host + "/c/api/tag/update",
-		TagMerge:               host + "/c/api/tag/merge",
-		TagMove:                host + "/c/api/tag/move",
-		TagSort:                host + "/c/api/tag/sort",
-		MarkLatest:             host + "/c/api/mark/search_engine/latest",
-		MarkList:               host + "/c/api/v2/mark",
-	}
-
-	return apiEndpoints
+	return host
 }
 
 func updateConfig(cuboxConfig utils.CuboxConfig) {
@@ -119,7 +91,7 @@ func request(option requestOption) (*APIResp, error) {
 /* ------------------------ Login ------------------------ */
 
 func Login() string {
-	var api = urls.Login
+	var api = baseHost + login
 	var password = utils.GetMd5Str(cuboxConfig.CuboxPassword)
 
 	body := LoginBody{
@@ -152,7 +124,7 @@ func Login() string {
 /* ------------------------ SearchEngine ------------------------ */
 
 func SearchEngineWebInfo(url string) (*WebInfo, error) {
-	var api = urls.SearchEngineWebInfo
+	var api = baseHost + searchEngineWebInfo
 
 	body := WebInfoBody{
 		URL: url,
@@ -186,7 +158,7 @@ func SearchEngineWebInfo(url string) (*WebInfo, error) {
 }
 
 func SearchEngineNew(url string, data *WebInfo) (*BookMark, error) {
-	var api = urls.SearchEngineNew
+	var api = baseHost + searchEngineNew
 
 	body := AddNewBody{
 		Type:        0,
