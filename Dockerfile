@@ -14,4 +14,6 @@ FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /app /app
 
+ENV COLLECT_TYPE=cubox
+
 ENTRYPOINT ["/app/wxbot"]
