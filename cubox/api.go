@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"wxbot/utils"
 )
 
@@ -18,11 +19,11 @@ var userAgent = utils.USER_AGENT
 const (
 	login                  = "/c/api/login"
 	userInfo               = "/c/api/userInfo"
-	searchEngineExport     = "/c/api/v2/search_engine/inbox"
-	searchEngineInbox      = "/c/api/v2/search_engine/my"
-	searchEngineToday      = "/c/api/search_engines/export/text"
-	searchEngineMy         = "/c/api/v2/search_engine/new"
-	searchEngineNew        = "/c/api/search_engine/today"
+	searchEngineExport     = "/c/api/search_engine/export/text"
+	searchEngineInbox      = "/c/api/v2/search_engine/inbox"
+	searchEngineToday      = "/c/api/search_engines/today"
+	searchEngineMy         = "/c/api/v2/search_engine/my"
+	searchEngineNew        = "/c/api/v2/search_engine/new"
 	searchEngineUpdate     = "/c/api/v3/search_engine/update"
 	searchEngineUpdateTags = "/c/api/v2/search_engines/updateTagsForName"
 	searchEngineWebInfo    = "/c/api/v2/search_engine/webInfo"
@@ -112,7 +113,7 @@ func Login() string {
 		log.Println("API 请求异常: ", err)
 		return ""
 	}
-	if result.Message != "" {
+	if strings.Contains(result.Message, "token") {
 		log.Println("API 请求失败: ", result.Message)
 		return ""
 	}
@@ -129,7 +130,7 @@ func RefreshToken() string {
 	if err == nil {
 		return token
 	}
-	if err.Error() == "token error!" {
+	if strings.Contains(err.Error(), "token") {
 		token = Login()
 		return token
 	}
@@ -151,7 +152,7 @@ func UserInfo() (*User, error) {
 		log.Println("API 请求异常: ", err)
 		return nil, err
 	}
-	if result.Message != "" {
+	if strings.Contains(result.Message, "token") {
 		log.Println("API 请求失败: ", err)
 		utils.PrintResp(result)
 		return nil, errors.New(result.Message)
@@ -186,7 +187,7 @@ func SearchEngineWebInfo(url string) (*WebInfo, error) {
 		log.Println("API 请求异常: ", err)
 		return nil, err
 	}
-	if result.Message != "" {
+	if strings.Contains(result.Message, "token") {
 		log.Println("API 请求失败: ", result.Message)
 		utils.PrintResp(result)
 		return nil, errors.New(result.Message)
@@ -223,7 +224,7 @@ func SearchEngineNew(url string, data *WebInfo) (*BookMark, error) {
 		log.Println("API 请求异常: ", err)
 		return nil, err
 	}
-	if result.Message != "" {
+	if strings.Contains(result.Message, "token") {
 		log.Println("API 请求失败: ", result.Message)
 		utils.PrintResp(result)
 		return nil, errors.New(result.Message)
